@@ -87,8 +87,9 @@ void DiagnoseCaseSensitiveFS::startGuidedFix(unsigned int key) const
 {
   if (key == PROBLEM_INCONSISTENTCAPITALIZATION) {
     fixInconsistentPaths();
+  } else {
+    throw Exception(tr("Invalid problem key %1").arg(key));
   }
-  throw Exception(tr("Invalid problem key %1").arg(key));
 }
 
 QString DiagnoseCaseSensitiveFS::name() const
