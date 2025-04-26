@@ -104,12 +104,12 @@ QString DiagnoseCaseSensitiveFS::author() const
 
 QString DiagnoseCaseSensitiveFS::description() const
 {
-  return u"Utilities and diagnostics for case-sensitive file systems."_s;
+  return u"Diagnostic plugin for case-sensitive file systems."_s;
 }
 
 bool DiagnoseCaseSensitiveFS::hasInconsistentPaths() const noexcept
 {
-  TimeThis tt(__PRETTY_FUNCTION__);
+  TimeThis tt(u"hasInconsistentPaths()"_s);
   QMap<QString, QString> relativePathMap;
 
   // check mods
