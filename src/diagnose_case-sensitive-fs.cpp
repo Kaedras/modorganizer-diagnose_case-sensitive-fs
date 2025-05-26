@@ -1,9 +1,9 @@
 #include "diagnose_case-sensitive-fs.h"
 
 #include <QDirIterator>
-#include <iostream>
 #include <ifiletree.h>
 #include <imoinfo.h>
+#include <iostream>
 #include <iplugingame.h>
 #include <ipluginlist.h>
 #include <log.h>
@@ -40,7 +40,8 @@ bool DiagnoseCaseSensitiveFS::init(IOrganizer* organizer)
 QList<PluginSetting> DiagnoseCaseSensitiveFS::settings() const
 {
   return {
-      {u"prevent_launch"_s, tr("Prevent application launch if issues are found"), true},
+      {u"prevent_launch"_s,
+       tr("Prevent application launch if any issues have been found"), true},
       {u"auto_rename_to_lower_case"_s,
        tr("Automatically rename paths to lower case on mod installation (excluding "
           "paths that exist inside game directory)"),
@@ -52,14 +53,14 @@ std::vector<unsigned int> DiagnoseCaseSensitiveFS::activeProblems() const
 {
   std::vector<unsigned int> result;
   if (hasInconsistentPaths()) {
-    result.push_back(PROBLEM_INCONSISTENTCAPITALIZATION);
+    result.push_back(PROBLEM_INCONSISTENT_CAPITALIZATION);
   }
   return result;
 }
 
 QString DiagnoseCaseSensitiveFS::shortDescription(unsigned int key) const
 {
-  if (key == PROBLEM_INCONSISTENTCAPITALIZATION) {
+  if (key == PROBLEM_INCONSISTENT_CAPITALIZATION) {
     return tr("Mods contain inconsistent paths");
   }
   throw Exception(tr("Invalid problem key %1").arg(key));
@@ -67,7 +68,7 @@ QString DiagnoseCaseSensitiveFS::shortDescription(unsigned int key) const
 
 QString DiagnoseCaseSensitiveFS::fullDescription(unsigned int key) const
 {
-  if (key == PROBLEM_INCONSISTENTCAPITALIZATION) {
+  if (key == PROBLEM_INCONSISTENT_CAPITALIZATION) {
     return tr("The installed mods use different capitalization for file paths that are "
               "otherwise identical. This will most likely cause issues on case "
               "sensitive file systems.");
@@ -77,7 +78,7 @@ QString DiagnoseCaseSensitiveFS::fullDescription(unsigned int key) const
 
 bool DiagnoseCaseSensitiveFS::hasGuidedFix(unsigned int key) const
 {
-  if (key == PROBLEM_INCONSISTENTCAPITALIZATION) {
+  if (key == PROBLEM_INCONSISTENT_CAPITALIZATION) {
     return true;
   }
   throw Exception(tr("Invalid problem key %1").arg(key));
@@ -85,7 +86,7 @@ bool DiagnoseCaseSensitiveFS::hasGuidedFix(unsigned int key) const
 
 void DiagnoseCaseSensitiveFS::startGuidedFix(unsigned int key) const
 {
-  if (key == PROBLEM_INCONSISTENTCAPITALIZATION) {
+  if (key == PROBLEM_INCONSISTENT_CAPITALIZATION) {
     fixInconsistentPaths();
   } else {
     throw Exception(tr("Invalid problem key %1").arg(key));
@@ -179,7 +180,7 @@ bool DiagnoseCaseSensitiveFS::renameNext(
     QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
                            u"/"_s % relativeFilePath;
 
-    // rename to lower case if entry does not exist in game path
+    // rename the file to lower case if the entry does not exist in the game path
     if (!existsCaseInsensitive(gameFilePath)) {
       // skip entry it's already lower case
       if (absoluteFilePath == absoluteWithLowerCaseFileName) {
@@ -194,7 +195,7 @@ bool DiagnoseCaseSensitiveFS::renameNext(
       }
       return true;
     }
-    // rename to match file in game path
+    // rename the file to match the one in the game path
     if (!QFile::exists(gameFilePath)) {
       QString targetFileName = getFileNameCaseInsensitive(gameFilePath);
       if (targetFileName.isEmpty()) {
@@ -203,7 +204,7 @@ bool DiagnoseCaseSensitiveFS::renameNext(
         return false;
       }
       QString sourceFileName = QFileInfo(absoluteFilePath).fileName();
-      // skip entry if path is correct
+      // skip entry if the path is correct
       if (sourceFileName == targetFileName) {
         continue;
       }
@@ -226,13 +227,13 @@ void DiagnoseCaseSensitiveFS::renameModPathsToLowerCase(
   }
 
   QString modPath = mod->absolutePath();
-  // Skip mod if it's located inside game data directory, this can happen with DLC
+  // skip mod if it's located inside the game data directory, this can happen with DLC
   if (modPath == m_organizer->managedGame()->dataDirectory().absolutePath()) {
     return;
   }
   while (renameNext(modPath, whatToRename)) {
-    // Repeat until function returns false
-    // This is required because QDirIterator becomes invalid after renaming a directory
+    // repeat until the function returns false
+    // this is required because QDirIterator becomes invalid after renaming a directory
   }
 }
 

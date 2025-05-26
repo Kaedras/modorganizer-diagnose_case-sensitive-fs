@@ -41,7 +41,7 @@ public:
   void startGuidedFix(unsigned int key) const override;
 
 private:
-  static constexpr unsigned int PROBLEM_INCONSISTENTCAPITALIZATION = 1;
+  static constexpr unsigned int PROBLEM_INCONSISTENT_CAPITALIZATION = 1;
 
   MOBase::IOrganizer* m_organizer;
 
@@ -50,17 +50,18 @@ private:
   void fixInconsistentPaths() const noexcept;
 
   /**
-   * @brief Renames mod paths to lower case, excluding paths that exist in game data
-   * directory.
+   * @brief Renames the mod paths to lower case, excluding paths that exist in the game
+   * data directory.
    * @param mod Mod to process.
-   * @param whatToRename Flags to specify whether to rename files, directories, or both.
+   * @param whatToRename
+   * Flags to specify whether to rename files, directories, or both.
    */
   void renameModPathsToLowerCase(const MOBase::IModInterface* mod,
                                  QFlags<QDir::Filters::enum_type> whatToRename =
                                      QDir::Dirs | QDir::Files) const noexcept;
 
   /**
-   * @brief Renames the next entry inside the provided path hat requires renaming. This
+   * @brief Renames the next entry inside the provided path that requires renaming. This
    * function is called by @link renameModPathsToLowerCase @endlink. It is required
    * because QDirIterator becomes invalid after renaming a directory.
    */
@@ -70,16 +71,14 @@ private:
 
   /**
    * @brief Checks whether the provided file or directory exists (case-insensitive).
-   * Case-insensitivity only applies to file name, not parent path.
+   * Case insensitivity only applies to the file name, not the parent path.
    * @param path Path to check.
-   * @return Whether the path exists or
-   * not.
+   * @return Whether the path exists or not.
    */
   static bool existsCaseInsensitive(const QString& path) noexcept;
 
   /**
-   * @brief Searches the parent directory of provided path for filename.
-   * Case-insensitivity only applies to file name, not parent path.
-   */
+   * @brief Searches the parent directory of the provided path for filename. Case
+   * insensitivity only applies to the file name, not the parent path. */
   static QString getFileNameCaseInsensitive(const QString& path) noexcept;
 };
