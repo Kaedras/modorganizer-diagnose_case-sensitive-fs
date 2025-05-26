@@ -2,11 +2,11 @@
 
 #include <QDirIterator>
 #include <iostream>
-#include <uibase/ifiletree.h>
-#include <uibase/imoinfo.h>
-#include <uibase/iplugingame.h>
-#include <uibase/ipluginlist.h>
-#include <uibase/log.h>
+#include <ifiletree.h>
+#include <imoinfo.h>
+#include <iplugingame.h>
+#include <ipluginlist.h>
+#include <log.h>
 
 using namespace MOBase;
 using namespace std;

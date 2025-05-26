@@ -1,5 +1,0 @@
-{
-  "name": "diagnose-case-sensitive-fs",
-  "dependencies": ["mo2-cmake", "mo2-uibase"],
-  "version": "4"
-}

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QString>
-#include <uibase/iplugin.h>
-#include <uibase/iplugindiagnose.h>
+#include <iplugin.h>
+#include <iplugindiagnose.h>
 
 #define EXPORT __attribute__((visibility("default")))
 
