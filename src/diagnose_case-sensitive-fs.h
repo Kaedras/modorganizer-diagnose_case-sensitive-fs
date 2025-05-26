@@ -53,21 +53,15 @@ private:
    * @brief Renames the mod paths to lower case, excluding paths that exist in the game
    * data directory.
    * @param mod Mod to process.
-   * @param whatToRename
-   * Flags to specify whether to rename files, directories, or both.
    */
-  void renameModPathsToLowerCase(const MOBase::IModInterface* mod,
-                                 QFlags<QDir::Filters::enum_type> whatToRename =
-                                     QDir::Dirs | QDir::Files) const noexcept;
+  void renameModPathsToLowerCase(const MOBase::IModInterface* mod) const noexcept;
 
   /**
    * @brief Renames the next entry inside the provided path that requires renaming. This
    * function is called by @link renameModPathsToLowerCase @endlink. It is required
    * because QDirIterator becomes invalid after renaming a directory.
    */
-  [[nodiscard]] bool
-  renameNext(const QString& path,
-             QFlags<QDir::Filters::enum_type> whatToRename) const noexcept;
+  [[nodiscard]] bool renameNext(const QString& path) const noexcept;
 
   /**
    * @brief Checks whether the provided file or directory exists (case-insensitive).

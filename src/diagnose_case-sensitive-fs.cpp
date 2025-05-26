@@ -119,10 +119,9 @@ bool DiagnoseCaseSensitiveFS::hasInconsistentPaths() const noexcept
   for (const auto& mod : mods) {
     IModInterface* modInfo = modList->getMod(mod);
     QString modPath        = modInfo->absolutePath();
-    QDirIterator iter(modPath, QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files,
-                      QDirIterator::Subdirectories);
-    while (iter.hasNext()) {
-      const QString absolutePath = iter.next();
+    for (const auto& dirEntry :
+         QDirListing(modPath, QDirListing::IteratorFlag::Recursive)) {
+      const QString absolutePath = dirEntry.absoluteFilePath();
       const QString relativePath = absolutePath.sliced(modPath.length() + 1);
       if (relativePathMap.contains(relativePath.toLower())) {
         if (relativePathMap[relativePath.toLower()] != relativePath) {
@@ -164,19 +163,16 @@ void DiagnoseCaseSensitiveFS::fixInconsistentPaths() const noexcept
   }
 }
 
-bool DiagnoseCaseSensitiveFS::renameNext(
-    const QString& path, QFlags<QDir::Filters::enum_type> whatToRename) const noexcept
+bool DiagnoseCaseSensitiveFS::renameNext(const QString& path) const noexcept
 {
-  QDirIterator iter(path, whatToRename | QDir::NoDotAndDotDot,
-                    QDirIterator::Subdirectories);
-  while (iter.hasNext()) {
-    QFileInfo entry = iter.nextFileInfo();
-
-    QString absoluteFilePath = entry.absoluteFilePath();
+  for (const QDirListing::DirEntry& dirEntry :
+       QDirListing(path, QDirListing::IteratorFlag::Recursive)) {
+    const QString absoluteFilePath = dirEntry.absoluteFilePath();
+    const QString absolutePath     = dirEntry.absolutePath();
     QString absoluteWithLowerCaseFileName =
-        entry.absolutePath() % u"/"_s % entry.fileName().toLower();
+        absolutePath % u"/"_s % dirEntry.fileName().toLower();
     QString relativeFilePath =
-        entry.absoluteFilePath().sliced(path.size() + 1);  // +1 to include slash
+        absolutePath.sliced(path.size() + 1);  // +1 to include slash
     QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
                            u"/"_s % relativeFilePath;
 
@@ -209,7 +205,7 @@ bool DiagnoseCaseSensitiveFS::renameNext(
         continue;
       }
 
-      QFile::rename(absoluteFilePath, entry.absolutePath() % u"/"_s % targetFileName);
+      QFile::rename(absoluteFilePath, absolutePath % u"/"_s % targetFileName);
       return true;
     }
   }
@@ -217,8 +213,7 @@ bool DiagnoseCaseSensitiveFS::renameNext(
 }
 
 void DiagnoseCaseSensitiveFS::renameModPathsToLowerCase(
-    const IModInterface* mod,
-    QFlags<QDir::Filters::enum_type> whatToRename) const noexcept
+    const IModInterface* mod) const noexcept
 {
   TimeThis tt(u"renameModPathsToLowerCase(%1)"_s.arg(mod->name()));
   if (mod == nullptr) {
@@ -231,7 +226,7 @@ void DiagnoseCaseSensitiveFS::renameModPathsToLowerCase(
   if (modPath == m_organizer->managedGame()->dataDirectory().absolutePath()) {
     return;
   }
-  while (renameNext(modPath, whatToRename)) {
+  while (renameNext(modPath)) {
     // repeat until the function returns false
     // this is required because QDirIterator becomes invalid after renaming a directory
   }
