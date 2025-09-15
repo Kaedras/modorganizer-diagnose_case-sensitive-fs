@@ -94,7 +94,7 @@ void DiagnoseCaseSensitiveFS::startGuidedFix(unsigned int key) const
 
 QString DiagnoseCaseSensitiveFS::name() const
 {
-  return u"Diagnosis plugin for case sensitive filesystems"_s;
+  return u"Diagnostic plugin for case sensitive filesystems"_s;
 }
 
 QString DiagnoseCaseSensitiveFS::author() const
