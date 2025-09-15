@@ -63,6 +63,8 @@ private:
    */
   [[nodiscard]] bool renameNext(const QString& path) const noexcept;
 
+  void renameAll(const QString& path) const noexcept;
+
   /**
    * @brief Checks whether the provided file or directory exists (case-insensitive).
    * Case insensitivity only applies to the file name, not the parent path.

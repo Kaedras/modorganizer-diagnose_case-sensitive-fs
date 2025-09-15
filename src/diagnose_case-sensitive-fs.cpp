@@ -211,6 +211,50 @@ bool DiagnoseCaseSensitiveFS::renameNext(const QString& path) const noexcept
   return false;
 }
 
+void DiagnoseCaseSensitiveFS::renameAll(const QString& path) const noexcept
+{
+  for (const QDirListing::DirEntry& dirEntry :
+       QDirListing(path, QDirListing::IteratorFlag::Recursive)) {
+    const QString absoluteFilePath = dirEntry.absoluteFilePath();
+    const QString absolutePath     = dirEntry.absolutePath();
+    QString absoluteWithLowerCaseFileName =
+        absolutePath % u"/"_s % dirEntry.fileName().toLower();
+    QString relativeFilePath =
+        absolutePath.sliced(path.size() + 1);  // +1 to include slash
+    QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
+                           u"/"_s % relativeFilePath;
+
+    // rename the file to lower case if the entry does not exist in the game path
+    if (!existsCaseInsensitive(gameFilePath)) {
+      // skip entry it's already lower case
+      if (absoluteFilePath == absoluteWithLowerCaseFileName) {
+        continue;
+      }
+      bool result = QFile::rename(absoluteFilePath, absoluteWithLowerCaseFileName);
+      if (!result) {
+        const int e = errno;
+        log::error("Error renaming {} to {}, {}", absoluteFilePath,
+                   absoluteWithLowerCaseFileName, strerror(e));
+      }
+    }
+    // rename the file to match the one in the game path
+    if (!QFile::exists(gameFilePath)) {
+      QString targetFileName = getFileNameCaseInsensitive(gameFilePath);
+      if (targetFileName.isEmpty()) {
+        log::warn("Error getting matching filename in game data directory, path was {}",
+                  gameFilePath);
+      }
+      QString sourceFileName = QFileInfo(absoluteFilePath).fileName();
+      // skip entry if the path is correct
+      if (sourceFileName == targetFileName) {
+        continue;
+      }
+
+      QFile::rename(absoluteFilePath, absolutePath % u"/"_s % targetFileName);
+    }
+  }
+}
+
 void DiagnoseCaseSensitiveFS::renameModPathsToLowerCase(
     const IModInterface* mod) const noexcept
 {
