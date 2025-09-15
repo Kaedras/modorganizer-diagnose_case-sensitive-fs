@@ -118,9 +118,11 @@ bool DiagnoseCaseSensitiveFS::hasInconsistentPaths() const noexcept
   for (const auto& mod : mods) {
     IModInterface* modInfo = modList->getMod(mod);
     QString modPath        = modInfo->absolutePath();
-    for (const auto& dirEntry :
-         QDirListing(modPath, QDirListing::IteratorFlag::Recursive)) {
-      const QString absolutePath = dirEntry.absoluteFilePath();
+
+    QDirIterator iter(modPath, QDirIterator::Subdirectories);
+    while (iter.hasNext()) {
+      QFileInfo info = iter.nextFileInfo();
+      const QString absolutePath = info.absoluteFilePath();
       const QString relativePath = absolutePath.sliced(modPath.length() + 1);
       if (relativePathMap.contains(relativePath.toLower())) {
         if (relativePathMap[relativePath.toLower()] != relativePath) {
@@ -164,12 +166,14 @@ void DiagnoseCaseSensitiveFS::fixInconsistentPaths() const noexcept
 
 bool DiagnoseCaseSensitiveFS::renameNext(const QString& path) const noexcept
 {
-  for (const QDirListing::DirEntry& dirEntry :
-       QDirListing(path, QDirListing::IteratorFlag::Recursive)) {
-    const QString absoluteFilePath = dirEntry.absoluteFilePath();
-    const QString absolutePath     = dirEntry.absolutePath();
+  QDirIterator iter(path, QDirIterator::Subdirectories);
+  while (iter.hasNext()) {
+    QFileInfo info = iter.nextFileInfo();
+
+    const QString absoluteFilePath = info.absoluteFilePath();
+    const QString absolutePath     = info.absolutePath();
     QString absoluteWithLowerCaseFileName =
-        absolutePath % u"/"_s % dirEntry.fileName().toLower();
+        absolutePath % u"/"_s % info.fileName().toLower();
     QString relativeFilePath =
         absolutePath.sliced(path.size() + 1);  // +1 to include slash
     QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
@@ -213,12 +217,14 @@ bool DiagnoseCaseSensitiveFS::renameNext(const QString& path) const noexcept
 
 void DiagnoseCaseSensitiveFS::renameAll(const QString& path) const noexcept
 {
-  for (const QDirListing::DirEntry& dirEntry :
-       QDirListing(path, QDirListing::IteratorFlag::Recursive)) {
-    const QString absoluteFilePath = dirEntry.absoluteFilePath();
-    const QString absolutePath     = dirEntry.absolutePath();
+  QDirIterator iter(path, QDirIterator::Subdirectories);
+  while (iter.hasNext()) {
+    QFileInfo info = iter.nextFileInfo();
+
+    const QString absoluteFilePath = info.absoluteFilePath();
+    const QString absolutePath     = info.absolutePath();
     QString absoluteWithLowerCaseFileName =
-        absolutePath % u"/"_s % dirEntry.fileName().toLower();
+        absolutePath % u"/"_s % info.fileName().toLower();
     QString relativeFilePath =
         absolutePath.sliced(path.size() + 1);  // +1 to include slash
     QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
