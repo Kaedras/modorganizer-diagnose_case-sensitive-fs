@@ -121,7 +121,7 @@ bool DiagnoseCaseSensitiveFS::hasInconsistentPaths() const noexcept
 
     QDirIterator iter(modPath, QDirIterator::Subdirectories);
     while (iter.hasNext()) {
-      QFileInfo info = iter.nextFileInfo();
+      QFileInfo info             = iter.nextFileInfo();
       const QString absolutePath = info.absoluteFilePath();
       const QString relativePath = absolutePath.sliced(modPath.length() + 1);
       if (relativePathMap.contains(relativePath.toLower())) {
