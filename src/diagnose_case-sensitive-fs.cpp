@@ -173,11 +173,11 @@ bool DiagnoseCaseSensitiveFS::renameNext(const QString& path) const noexcept
     const QString absoluteFilePath = info.absoluteFilePath();
     const QString absolutePath     = info.absolutePath();
     QString absoluteWithLowerCaseFileName =
-        absolutePath % u"/"_s % info.fileName().toLower();
+        absolutePath % "/"_L1 % info.fileName().toLower();
     QString relativeFilePath =
         absolutePath.sliced(path.size() + 1);  // +1 to include slash
     QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
-                           u"/"_s % relativeFilePath;
+                           "/"_L1 % relativeFilePath;
 
     // rename the file to lower case if the entry does not exist in the game path
     if (!existsCaseInsensitive(gameFilePath)) {
@@ -208,57 +208,11 @@ bool DiagnoseCaseSensitiveFS::renameNext(const QString& path) const noexcept
         continue;
       }
 
-      QFile::rename(absoluteFilePath, absolutePath % u"/"_s % targetFileName);
+      QFile::rename(absoluteFilePath, absolutePath % "/"_L1 % targetFileName);
       return true;
     }
   }
   return false;
-}
-
-void DiagnoseCaseSensitiveFS::renameAll(const QString& path) const noexcept
-{
-  QDirIterator iter(path, QDirIterator::Subdirectories);
-  while (iter.hasNext()) {
-    QFileInfo info = iter.nextFileInfo();
-
-    const QString absoluteFilePath = info.absoluteFilePath();
-    const QString absolutePath     = info.absolutePath();
-    QString absoluteWithLowerCaseFileName =
-        absolutePath % u"/"_s % info.fileName().toLower();
-    QString relativeFilePath =
-        absolutePath.sliced(path.size() + 1);  // +1 to include slash
-    QString gameFilePath = m_organizer->managedGame()->dataDirectory().absolutePath() %
-                           u"/"_s % relativeFilePath;
-
-    // rename the file to lower case if the entry does not exist in the game path
-    if (!existsCaseInsensitive(gameFilePath)) {
-      // skip entry it's already lower case
-      if (absoluteFilePath == absoluteWithLowerCaseFileName) {
-        continue;
-      }
-      bool result = QFile::rename(absoluteFilePath, absoluteWithLowerCaseFileName);
-      if (!result) {
-        const int e = errno;
-        log::error("Error renaming {} to {}, {}", absoluteFilePath,
-                   absoluteWithLowerCaseFileName, strerror(e));
-      }
-    }
-    // rename the file to match the one in the game path
-    if (!QFile::exists(gameFilePath)) {
-      QString targetFileName = getFileNameCaseInsensitive(gameFilePath);
-      if (targetFileName.isEmpty()) {
-        log::warn("Error getting matching filename in game data directory, path was {}",
-                  gameFilePath);
-      }
-      QString sourceFileName = QFileInfo(absoluteFilePath).fileName();
-      // skip entry if the path is correct
-      if (sourceFileName == targetFileName) {
-        continue;
-      }
-
-      QFile::rename(absoluteFilePath, absolutePath % u"/"_s % targetFileName);
-    }
-  }
 }
 
 void DiagnoseCaseSensitiveFS::renameModPathsToLowerCase(
@@ -283,16 +237,7 @@ void DiagnoseCaseSensitiveFS::renameModPathsToLowerCase(
 
 bool DiagnoseCaseSensitiveFS::existsCaseInsensitive(const QString& path) noexcept
 {
-  QFileInfo info(path);
-  QString fileName = info.fileName();
-  QDirIterator iter(info.dir());
-  while (iter.hasNext()) {
-    if (iter.nextFileInfo().fileName().compare(fileName, Qt::CaseInsensitive) == 0) {
-      return true;
-    }
-  }
-
-  return false;
+  return !getFileNameCaseInsensitive(path).isEmpty();
 }
 
 QString

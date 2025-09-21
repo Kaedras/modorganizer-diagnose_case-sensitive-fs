@@ -6,7 +6,6 @@
     <message>
         <location filename="diagnose_case-sensitive-fs.cpp" line="43"/>
         <source>Prevent application launch if any issues have been found</source>
-        <oldsource>Prevent application launch if issues have been found</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
